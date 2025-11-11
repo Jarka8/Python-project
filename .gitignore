@@ -1,6 +1,6 @@
 venv/
 __pycache__/
-data/
-outputs/
 *.pyc
 .DS_Store
+.vscode/
+*.csv
