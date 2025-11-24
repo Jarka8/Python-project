@@ -1,25 +1,72 @@
-import wbgapi as wb
 import pandas as pd
-import numpy as np
-
-df = pd.read_csv("/Users/jarka/Desktop/Python-project/data/raw/all_indicators.csv")
-
-# Select only the numeric columns (years)
-year_cols = df.columns[2:]
-
-# Sort indicators by missing fraction in descending order
-missing_per_indicator = df.groupby('series')[year_cols].apply(lambda x: x.isna().mean().mean())
-print("Missing values per indicator:")
-print(missing_per_indicator.sort_values(ascending=False))
-
-# Drop least covered ones from the DataFrame
-df_clean1 = df[~df['series'].isin(['SH.STA.WASH.P5', 'SH.STA.AIRP.P5', 'SH.H2O.SMDW.ZS'])]
-
-year_cols = df_clean1.columns[2:]
-
-# Calculate missing fraction per country
-missing_per_country = df_clean1.groupby('economy')[year_cols].apply(lambda x: x.isna().mean().mean())
-print("Missing values per country:")
-print(missing_per_country.sort_values(ascending=False))
 
 
+def clean_data():
+    """Cleans the raw data - removing indicators and countries with significant missing data."""
+    
+    # Load raw data
+    df = pd.read_csv("data/raw/all_indicators.csv")
+    # Select only the numeric columns (years)
+    year_cols = df.columns[2:]
+
+    treshold = 0.3  # 30% missing data allowed
+
+    # Sort indicators by missing fraction in descending order
+    missing_per_indicator = df.groupby('series')[year_cols].apply(lambda x: x.isna().mean().mean())
+
+    # Drop least covered ones 
+    print(f"Indicators with over 30% of missing data {missing_per_indicator[missing_per_indicator > treshold]}")
+    low_data_indicators = missing_per_indicator[missing_per_indicator > treshold].index
+    df_clean1 = df[~df['series'].isin(low_data_indicators)]
+    
+    # Select only the numeric columns (years)
+    year_cols = df_clean1.columns[2:]
+
+    # Calculate missing fraction per country
+    missing_per_country = df_clean1.groupby('economy')[year_cols].apply(lambda x: x.isna().mean().mean())
+    
+    # Drop countries with too much missing data
+    print(f"Countries with over 30% of missing data {missing_per_country[missing_per_country > treshold]}")
+    low_data_countries = missing_per_country[missing_per_country > treshold].index
+    df_clean2 = df_clean1[~df_clean1['economy'].isin(low_data_countries)]
+    df_clean2.to_csv('data/cleaned/all_indicators_cleaned.csv', index=False)
+    print("Cleaned data saved to data/processed/all_indicators_cleaned.csv")
+
+def split_data():
+    """Splits the cleaned data into separate files per indicator."""
+    
+    # Load cleaned data
+    df = pd.read_csv("data/cleaned/all_indicators_cleaned.csv")
+    for indicator, subset in df.groupby("series"):
+        # Clean year columns to contain only year number
+        subset.columns = subset.columns.str.replace("YR", "")
+        
+        # Remove the indicator column (since file is per-indicator)
+        subset = subset.drop(columns = ["series"])
+    
+        # Create readable filename
+        indicator_names = {
+            'AG.LND.FRST.ZS': 'forest_area',
+            'EG.FEC.RNEW.ZS': 'renewable_energy',
+            'EN.ATM.PM25.MC.M3': 'pm25_pollution',
+            'EN.GHG.ALL.PC.CE.AR5': 'ghg_per_capita',
+            'EN.GHG.CO2.PC.CE.AR5': 'co2_per_capita',
+            'EN.GHG.CO2.RT.GDP.PP.KD': 'carbon_intensity',
+            'NY.GDP.MKTP.KD.ZG': 'gdp_growth',
+            'NY.GDP.PCAP.PP.KD': 'gdp_per_capita',
+            'SH.DYN.MORT': 'child_mortality',
+            'SH.XPD.CHEX.GD.ZS': 'health_exp_pct_gdp',
+            'SH.XPD.CHEX.PC.CD': 'health_exp_per_capita',
+            'SP.DYN.LE00.IN': 'life_expectancy',
+            'SP.POP.GROW': 'population_growth',
+            'SP.POP.TOTL': 'population',
+            'SP.URB.TOTL.IN.ZS': 'urban_population'
+        }
+    
+        filename = indicator_names.get(indicator)
+        path = f"data/cleaned/{filename}.csv"
+        subset.to_csv(path, index=False)
+        print(f"Saved: {path}")
+
+
+exit()
