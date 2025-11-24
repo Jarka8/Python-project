@@ -1,5 +1,6 @@
 import pandas as pd
-
+import os
+import glob
 
 def clean_data():
     """Cleans the raw data - removing indicators and countries with significant missing data."""
@@ -29,8 +30,10 @@ def clean_data():
     print(f"Countries with over 30% of missing data {missing_per_country[missing_per_country > treshold]}")
     low_data_countries = missing_per_country[missing_per_country > treshold].index
     df_clean2 = df_clean1[~df_clean1['economy'].isin(low_data_countries)]
-    df_clean2.to_csv('data/cleaned/all_indicators_cleaned.csv', index=False)
-    print("Cleaned data saved to data/processed/all_indicators_cleaned.csv")
+    
+    path = "data/cleaned/all_indicators_cleaned.csv"
+    df_clean2.to_csv(path, index=False)
+    print(f"Cleaned data saved to {path}")
 
 def split_data():
     """Splits the cleaned data into separate files per indicator."""
@@ -67,6 +70,36 @@ def split_data():
         path = f"data/cleaned/{filename}.csv"
         subset.to_csv(path, index=False)
         print(f"Saved: {path}")
+
+
+def long_format_data():
+    """Converts each cleaned indicator file to long format and saves it."""
+    # Get list of all CSV files in the cleaned folder
+    csv_files = glob.glob("data/cleaned/*.csv")
+    # Load each CSV, convert to long format, and save
+    for f in csv_files:
+        df = pd.read_csv(f)
+        name = os.path.splitext(os.path.basename(f))[0]
+        long_df = df.melt(id_vars=['economy'], var_name='year', value_name=name)
+        os.makedirs("data/long", exist_ok=True)
+        long_df.to_csv(f"data/long/{name}_long.csv", index=False)
+
+
+def load_indicator_data():
+    """
+    Loads all long-format indicator CSVs from the cleaned data folder into a dictionary of DataFrames.
+    
+    Returns:
+        data (dict): Dictionary where keys are indicator names (from filenames) and values are DataFrames.
+    """
+    # Get list of all CSV files in the cleaned folder
+    csv_files = glob.glob("data/long/*.csv")
+    # Load each CSV into a dictionary of DataFrames for easy access
+    data = {}
+    for f in csv_files:
+        name = os.path.splitext(os.path.basename(f))[0]  
+        data[name] = pd.read_csv(f)
+    return data
 
 
 exit()
