@@ -1,26 +1,36 @@
 import streamlit as st
-import plotly.express as px
 import sys
-import os
-
+from pathlib import Path
 # Add project root to Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+from project_code.data_cleaning import load_indicator_data    
+from project_code.visualization import correlation_scatterplot
 
-from visualization import correlation_scatterplot
-from data_cleaning import load_indicator_data
+# Streamlit app 
+st.title("The Wealth of Nations: Analysing Economic Environmental and Health Indicators")
 
 # Load data
 data = load_indicator_data()
 
-# Select indicators
-x_ind = st.sidebar.selectbox("Indicator X", list(data.keys()))
-y_ind = st.sidebar.selectbox("Indicator Y", list(data.keys()))
+# Let user select indicators
+indicators = list(data.keys())
 
-# Scatterplot function call
-figures = correlation_scatterplot(data, x_ind, y_ind)
+indicator_display_names = {
+    name: name.replace("_", " ").title() 
+    for name in indicators
+}
 
-# Select year to show
-year = st.sidebar.selectbox("Select Year", sorted(figures.keys()))
+indicator_x = st.selectbox("Select X indicator", options=indicators, format_func=lambda x: indicator_display_names[x])
 
-# Display
-st.plotly_chart(figures[year])
+# Remove the selected X indicator from Y options
+available_for_y = [ind for ind in data.keys() if ind != indicator_x]
+indicator_y = st.selectbox("Select Y indicator", options=available_for_y, format_func=lambda x: indicator_display_names[x])
+
+
+# Generate scatterplots for all years
+figs = correlation_scatterplot(data, indicator_x, indicator_y)
+
+# Let user choose a year
+year = st.slider("Select year", min_value=min(figs.keys()), max_value=max(figs.keys()), value=min(figs.keys()))
+st.plotly_chart(figs[year])

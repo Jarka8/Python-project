@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 import glob
+from pathlib import Path
+import pycountry
 
 def clean_data():
     """Cleans the raw data - removing indicators and countries with significant missing data."""
@@ -85,6 +87,20 @@ def long_format_data():
         long_df.to_csv(f"data/long/{name}_long.csv", index=False)
 
 
+def rename_economies(df):
+    """Renames 3-letter country codes to full country names in the 'economy' column."""
+    df = df.copy()
+    # Create mapping dictionary
+    code_to_country = {}
+    for c in pycountry.countries:
+        if hasattr(c, "alpha_3"):
+            code_to_country[c.alpha_3] = c.name
+    # Map codes to names
+    df["economy"] = df["economy"].map(code_to_country).fillna(df["economy"])
+    return df
+
+
+
 def load_indicator_data():
     """
     Loads all long-format indicator CSVs from the cleaned data folder into a dictionary of DataFrames.
@@ -92,14 +108,19 @@ def load_indicator_data():
     Returns:
         data (dict): Dictionary where keys are indicator names (from filenames) and values are DataFrames.
     """
-    # Get list of all CSV files in the cleaned folder
-    csv_files = glob.glob("data/long/*.csv")
-    # Load each CSV into a dictionary of DataFrames for easy access
+    project_root = Path(__file__).parent.parent
+    data_path = project_root/"data"/"long"
+    csv_files = glob.glob(str(data_path/"*.csv"))
+  
     data = {}
     for f in csv_files:
-        name = os.path.splitext(os.path.basename(f))[0]  
-        data[name] = pd.read_csv(f)
+        if os.path.basename(f) == "all_indicators_cleaned_long.csv":
+            continue
+        name = os.path.splitext(os.path.basename(f))[0]
+        name = name.replace('_long', '')  
+        df = pd.read_csv(f)
+        df = rename_economies(df)
+        data[name] = df
+    
     return data
 
-
-exit()

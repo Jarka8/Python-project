@@ -21,10 +21,10 @@ def collect_data():
         'SH.STA.WASH.P5', 'SP.POP.GROW', 'SP.POP.TOTL', 'SP.URB.TOTL.IN.ZS'
     ]
 
+    print("Collecting data from World Bank API this may take a while have a cup of coffee...")
     data = wb.data.DataFrame(indicators, filtered_countries, time = range(2000, 2024))
     path = "data/raw/all_indicators.csv"
     data.to_csv(path, index=False)
     print(f"Raw data saved to {path}")
 
-collect_data()
 exit()

@@ -1,11 +1,5 @@
-# run in a Python shell / at top of main.py for debugging
-import os, sys
-print("cwd:", os.getcwd())
-print("sys.path[0]:", sys.path[0])
-print("module exists:", os.path.exists("data_collection.py"))
-
-from data_collection import collect_data
-from data_cleaning import clean_data, split_data
+from .data_collection import collect_data
+from .data_cleaning import clean_data, split_data, make_long_format
 
 if __name__ == "__main__":
     # Collect raw data from World Bank API
@@ -16,3 +10,10 @@ if __name__ == "__main__":
     
     # Split the cleaned data into separate files per indicator
     split_data()
+    
+    # Convert each cleaned indicator file to long format
+    make_long_format()
+    
+    
+    
+    
