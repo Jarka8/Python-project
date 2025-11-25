@@ -1,36 +1,55 @@
 import streamlit as st
 import sys
 from pathlib import Path
+
 # Add project root to Python path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
-from project_code.data_cleaning import load_indicator_data    
-from project_code.visualization import correlation_scatterplot
+from project_code.data_cleaning import load_indicator_data
+from project_code.visualization import map_plot
 
-# Streamlit app 
+# Streamlit app
 st.title("The Wealth of Nations: Analysing Economic Environmental and Health Indicators")
 
+st.markdown("""
+This dashboard allows you to explore various economic, environmental, and health 
+indicators for countries around the world. On this page you can select one indicator
+and a year to see its values per country on the map. Just hover over countries and explore.
+To compare two indicators and see how they correlate with each other, go to the Scatterplots 
+page. Does the health and environment of a nation improve with its wealth? Find out!
+""")
+
+st.markdown("""
+Some countries with higher GDP also show better health indicators — but what about their pollution levels? 
+Could industrial growth be affecting air quality and, in turn, health or does the health expenditure offset this? 
+How might these relationships evolve over time? Explore the charts to uncover possible connections between 
+the economy, environment, and well-being.
+""")
+
+
 # Load data
-data = load_indicator_data()
+data = load_indicator_data(rename_countries=False)
 
-# Let user select indicators
+# Let user select indicator
 indicators = list(data.keys())
+default_indicator = "gdp_per_capita"
+indicator_display_names = {name: name.replace("_", " ").title() for name in indicators}
+indicator = st.selectbox(
+    "Select indicator", 
+    options=indicators, 
+    format_func=lambda x: indicator_display_names[x],
+    index=indicators.index(default_indicator)
+    )
+# and year
+year = st.slider(
+    "Select year",
+    min_value=min(data[indicator]["year"]),
+    max_value=max(data[indicator]["year"]),
+    value=max(data[indicator]["year"])  # default latest year
+)
 
-indicator_display_names = {
-    name: name.replace("_", " ").title() 
-    for name in indicators
-}
-
-indicator_x = st.selectbox("Select X indicator", options=indicators, format_func=lambda x: indicator_display_names[x])
-
-# Remove the selected X indicator from Y options
-available_for_y = [ind for ind in data.keys() if ind != indicator_x]
-indicator_y = st.selectbox("Select Y indicator", options=available_for_y, format_func=lambda x: indicator_display_names[x])
+map = map_plot(data, indicator, year)
+st.plotly_chart(map)
 
 
-# Generate scatterplots for all years
-figs = correlation_scatterplot(data, indicator_x, indicator_y)
 
-# Let user choose a year
-year = st.slider("Select year", min_value=min(figs.keys()), max_value=max(figs.keys()), value=min(figs.keys()))
-st.plotly_chart(figs[year])

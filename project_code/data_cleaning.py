@@ -3,6 +3,8 @@ import os
 import glob
 from pathlib import Path
 import pycountry
+import streamlit as st
+import time
 
 def clean_data():
     """Cleans the raw data - removing indicators and countries with significant missing data."""
@@ -101,17 +103,18 @@ def rename_economies(df):
 
 
 
-def load_indicator_data():
+@st.cache_data  # Streamlit will cache the result
+def load_indicator_data(rename_countries=True):
     """
     Loads all long-format indicator CSVs from the cleaned data folder into a dictionary of DataFrames.
-    
-    Returns:
-        data (dict): Dictionary where keys are indicator names (from filenames) and values are DataFrames.
+    rename_countries: If True, converts ISO codes to country names. If False, keeps ISO-3 codes.
+    Returns: data (dict): Dictionary where keys are indicator names and values are DataFrames.
     """
+    time.sleep(1)  # Simulate a delay for loading data
     project_root = Path(__file__).parent.parent
     data_path = project_root/"data"/"long"
     csv_files = glob.glob(str(data_path/"*.csv"))
-  
+    
     data = {}
     for f in csv_files:
         if os.path.basename(f) == "all_indicators_cleaned_long.csv":
@@ -119,7 +122,12 @@ def load_indicator_data():
         name = os.path.splitext(os.path.basename(f))[0]
         name = name.replace('_long', '')  
         df = pd.read_csv(f)
-        df = rename_economies(df)
+        # Rename countries only when needed 
+        # (keeps codes for map but shows full names in scatterplots)
+        if rename_countries:
+            df = rename_economies(df)
+        
+        data[name] = df
         data[name] = df
     
     return data
