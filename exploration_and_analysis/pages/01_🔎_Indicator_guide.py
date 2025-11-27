@@ -1,16 +1,26 @@
+"""
+The page for the dashboard which explains each available indicator.
+"""
+
 import streamlit as st
+
+st.set_page_config(
+    page_title="The Wealth of Nations",
+    layout="wide",
+    page_icon="🗺️"
+)
 
 st.title("📖 Indicator Guide")
 
 st.markdown("""
-## 📊 A Guide to the available indicators
+## 🔎 A Guide to the available indicators
 
 To help you explore global development patterns, the dashboard includes key indicators across the economy, health, environment, and population.  
 Below is a short description of what each variable represents and why it matters.
 
 ---
 
-## 🏦 Economy
+## 💸 Economy
 - **GDP per capita, PPP (constant 2021 international $)**  
   Measures average economic output per person, allowing comparisons across countries by adjusting for price levels.
 
@@ -55,7 +65,7 @@ Below is a short description of what each variable represents and why it matters
 
 ---
 
-## 👥 Population & Urbanization
+## 👩🏼‍🤝‍👩🏿 Population & Urbanization
 - **Population growth (annual %)**  
   Shows how fast the population is increasing or decreasing.
 

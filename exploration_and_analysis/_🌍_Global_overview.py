@@ -1,15 +1,23 @@
-import streamlit as st
-import sys
-from pathlib import Path
+"""
+The main page of the interactive dasboard.
+"""
 
-# Add project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+import streamlit as st
 from project_code.data_cleaning import load_indicator_data
-from project_code.visualization import map_plot
+from project_code.visualization import plot_map
+
+
+st.set_page_config(
+    page_title="The Wealth of Nations",
+    layout="wide",
+    page_icon="🗺️"
+)
 
 # Streamlit app
-st.title("The Wealth of Nations: Analysing Economic Environmental and Health Indicators")
+st.title("🗺️ The Wealth of Nations")
+
+st.markdown("## Analysing Economic Environmental and Health Indicators")
+
 
 st.markdown("""
 This dashboard allows you to explore various economic, environmental, and health 
@@ -48,8 +56,5 @@ year = st.slider(
     value=max(data[indicator]["year"])  # default latest year
 )
 
-map = map_plot(data, indicator, year)
-st.plotly_chart(map)
-
-
-
+plot_chor_map = plot_map(data, indicator, year)
+st.plotly_chart(plot_chor_map)
