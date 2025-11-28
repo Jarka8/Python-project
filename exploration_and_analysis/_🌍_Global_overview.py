@@ -2,10 +2,20 @@
 The main page of the interactive dasboard.
 """
 
+import os
 import streamlit as st
+import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+from project_code.main import setup
 from project_code.data_cleaning import load_indicator_data
 from project_code.visualization import plot_map
 
+if not os.path.exists("data/long"):
+    with st.spinner("Setting up data for the first time... This may take a minute."):
+        setup()
+    st.success("Data setup complete!")
 
 st.set_page_config(
     page_title="The Wealth of Nations",
@@ -17,7 +27,6 @@ st.set_page_config(
 st.title("🗺️ The Wealth of Nations")
 
 st.markdown("## Analysing Economic Environmental and Health Indicators")
-
 
 st.markdown("""
 This dashboard allows you to explore various economic, environmental, and health 
@@ -33,7 +42,6 @@ Could industrial growth be affecting air quality and, in turn, health or does th
 How might these relationships evolve over time? Explore the charts to uncover possible connections between 
 the economy, environment, and well-being.
 """)
-
 
 # Load data
 data = load_indicator_data(rename_countries=False)

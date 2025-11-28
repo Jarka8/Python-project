@@ -15,3 +15,5 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 
+export PYTHONPATH=/Users/jarka/Desktop/Python-project:$PYTHONPATH
+streamlit run exploration_and_analysis/_🌍_Global_overview.py

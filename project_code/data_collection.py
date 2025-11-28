@@ -5,7 +5,7 @@ project_analysis.ipynb from the World Bank API.
 """
 
 import wbgapi as wb
-
+import pandas as pd
 
 def collect_data():
     """Collects raw data from the World Bank API and saves it to a CSV file."""
@@ -47,5 +47,26 @@ def collect_data():
     )
     data = wb.data.DataFrame(indicators, filtered_countries, time=range(2000, 2024))
     path = "data/raw/all_indicators.csv"
-    data.to_csv(path, index=False)
+    data.to_csv(path)
     print(f"Raw data saved to {path}")
+
+
+def ensure_valid_raw_data():
+    """
+    Ensures that the raw data file contains economy and series columns.
+    If not, replaces it with the backup version.
+    """
+    csv_path = "data/raw/all_indicators.csv"
+    backup_path = "data/raw/raw_data_backup.txt"
+    df = pd.read_csv(csv_path)
+    
+    # Check the structure
+    if "economy" in df.columns and "series" in df.columns:
+        print("✔ Raw data structure is valid.")
+        return
+    else:
+        print("⚠ Raw data missing required columns. Restoring backup...")
+        backup_df = pd.read_csv(backup_path)
+        # Save backup over wrong CSV
+        backup_df.to_csv(csv_path, index=False)
+        print("🔄 Raw data restored from backup.")
