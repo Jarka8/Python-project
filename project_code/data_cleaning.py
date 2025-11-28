@@ -143,6 +143,5 @@ def load_indicator_data(rename_countries=True):
             df = rename_economies(df)
 
         data[name] = df
-        data[name] = df
 
     return data

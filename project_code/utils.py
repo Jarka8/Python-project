@@ -1,29 +1,34 @@
 """
-This module contains function for merging the selected indicators into one 
+This module contains function for merging the selected indicators into one
 DataFrame and also selects the value column
 """
+
 
 def merge_indicators(data, indicators: list):
     """
     Merges data for indicators provided in a list based on ['economy', 'year'].
-    Returns:
-        merged_df (DataFrame): merged and cleaned dataset
-        value_cols (dict): indicator → detected value column
     """
-    # Load dataframe for the first indicator
-    df = data[indicators[0]].copy()
-    
-    # Detect the value column (only non economy/year column)
-    val_cols = {
-        ind : [c for c in data[ind].columns if c not in ["economy", "year"]][0]
-        for ind in indicators
-    }
+    df_merged = None
+    val_cols = {}
 
-    # Merge the datasets for all indicators
-    for ind in indicators[1:]:
-        df = df.merge(data[ind], on=["economy", "year"], how="inner")
+    for i, ind in enumerate(indicators):
+        df = data[ind].copy()
+        # Detect value column (exclude 'economy' and 'year')
+        val_col = [c for c in df.columns if c not in ["economy", "year"]][0]
 
-    # Drop missing rows
-    df = df.dropna(subset=val_cols.values())
+        # Rename value column to avoid collisions
+        # In case user analyses 2 indicators in 2d scatterplot
+        # but one of them is the third fixed indicator for 3d plot
+        new_col = f"{val_col}_{i}"
+        df = df.rename(columns={val_col: new_col})
+        val_cols[ind] = new_col
 
-    return df, val_cols
+        if df_merged is None:
+            df_merged = df
+        else:
+            df_merged = df_merged.merge(df, on=["economy", "year"], how="inner")
+
+    # Drop rows with missing values in any of the selected indicators
+    df_merged = df_merged.dropna(subset=list(val_cols.values()))
+
+    return df_merged, val_cols

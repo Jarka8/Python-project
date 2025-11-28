@@ -7,6 +7,7 @@ import plotly.express as px
 import streamlit as st
 from project_code.utils import merge_indicators
 import pandas as pd
+import pycountry
 
 
 def plot_map(data, indicator, year):
@@ -20,18 +21,48 @@ def plot_map(data, indicator, year):
     value_col = [col for col in df.columns if col not in ["economy", "year"]][0]
 
     # Filter for selected year
-    df_year = df[df["year"] == year]
+    df_year = df[df["year"] == year].copy()
+
+    # Keep country codes to load the map and create column with whole country name for display
+    code_to_country = {}
+    for c in pycountry.countries:
+        if hasattr(c, "alpha_3"):
+            code_to_country[c.alpha_3] = c.name
+
+    df_year["country"] = (
+        df_year["economy"].map(code_to_country).fillna(df_year["economy"])
+    )
+
+    # Indicators where HIGH is BAD - use scale (red=high, green=low) such as mortality
+    # Indicators where LOW is BAD - use (red = low) such as life expectancy
+    # Neutral indicators use blue
+    bad_indicators = [
+        "child_mortality",
+        "pm25_pollution",
+        "co2_per_capita",
+        "ghg_per_capita",
+        "carbon_intensity",
+    ]
+    good_indicators = ["forest_area", "life_expectancy", "renewable_energy"]
+    # Choose color scale based on indicator type
+    if indicator in bad_indicators:
+        color_scale = "RdYlGn_r"
+    elif indicator in good_indicators:
+        color_scale = "RdYlGn"
+    else:
+        color_scale = "Veridius"
 
     # Create map
     plot_map = px.choropleth(
         df_year,
         locations="economy",
         color=value_col,  # makes color shade based on indicator values
-        hover_name="economy",
-        color_continuous_scale="RdYlGn_r",
-        projection="natural earth",
+        hover_name="country",
+        color_continuous_scale=color_scale,
+        projection="robinson",
         title=f"{indicator.replace('_',' ').title()} — {year}",
     )
+
     plot_map.update_layout(margin={"r": 0, "t": 50, "l": 0, "b": 0})
     return plot_map
 

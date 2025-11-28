@@ -48,7 +48,7 @@ data = load_indicator_data(rename_countries=False)
 
 # Let user select indicator
 indicators = list(data.keys())
-default_indicator = "gdp_per_capita"
+default_indicator = "life_expectancy"
 indicator_display_names = {name: name.replace("_", " ").title() for name in indicators}
 indicator = st.selectbox(
     "Select indicator", 
@@ -56,12 +56,17 @@ indicator = st.selectbox(
     format_func=lambda x: indicator_display_names[x],
     index=indicators.index(default_indicator)
     )
+
+# Drop NAs so the years with no data are not available
+for ind in data:
+    data[ind] = data[ind].dropna()
+
 # and year
 year = st.slider(
     "Select year",
     min_value=min(data[indicator]["year"]),
     max_value=max(data[indicator]["year"]),
-    value=max(data[indicator]["year"])  # default latest year
+    value=max(data[indicator]["year"])  
 )
 
 plot_chor_map = plot_map(data, indicator, year)
