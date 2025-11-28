@@ -1,13 +1,8 @@
 """
 The main page of the interactive dasboard.
 """
-
 import os
 import streamlit as st
-import sys
-from pathlib import Path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 from project_code.main import setup
 from project_code.data_cleaning import load_indicator_data
 from project_code.visualization import plot_map
@@ -37,7 +32,7 @@ page. Does the health and environment of a nation improve with its wealth? Find 
 """)
 
 st.markdown("""
-Some countries with higher GDP also show better health indicators — but what about their pollution levels? 
+Some countries with higher GDP also show better health indicators, but what about their pollution levels? 
 Could industrial growth be affecting air quality and, in turn, health or does the health expenditure offset this? 
 How might these relationships evolve over time? Explore the charts to uncover possible connections between 
 the economy, environment, and well-being.

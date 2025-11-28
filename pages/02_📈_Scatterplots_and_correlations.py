@@ -14,18 +14,18 @@ from project_code.analysis import calculate_correlations, partial_corr
 st.set_page_config(page_title="The Wealth of Nations", layout="wide", page_icon="🗺️")
 
 st.title("📈 Scatterplots and Correlations")
-st.markdown("""
+st.markdown(
+    """
 ## Explore correlation between two indicators per chosen year or see the animated version over the years.
-""")
+"""
+)
 
 # Load data
 data = load_indicator_data(rename_countries=True)
 
 # Let user select indicators
 indicators = list(data.keys())
-indicator_display_names = {
-    name: name.replace("_", " ").title() for name in indicators
-}
+indicator_display_names = {name: name.replace("_", " ").title() for name in indicators}
 default_indicator_x = indicators.index("life_expectancy")
 
 indicator_x = st.selectbox(
@@ -33,7 +33,7 @@ indicator_x = st.selectbox(
     options=indicators,
     format_func=lambda x: indicator_display_names[x],
     key="x_indicator_selectbox",
-    index=default_indicator_x
+    index=default_indicator_x,
 )
 
 # Remove the selected X indicator from Y options
@@ -45,8 +45,8 @@ indicator_y = st.selectbox(
     options=available_for_y,
     format_func=lambda x: indicator_display_names[x],
     key="y_indicator_selectbox",
-    index=default_indicator_y
-) 
+    index=default_indicator_y,
+)
 
 # Let user choose a year
 year = st.slider(

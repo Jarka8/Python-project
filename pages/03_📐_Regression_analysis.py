@@ -17,7 +17,8 @@ indicators = list(data.keys())
 indicator_display_names = {name: name.replace("_", " ").title() for name in indicators}
 
 with st.expander("What is Regression Analysis?", expanded=False):
-    st.markdown("""
+    st.markdown(
+        """
     **Regression analysis** helps us understand the relationship between variables.
     - Does higher GDP lead to better health outcomes?
     - How does health expenditure relate to life expectancy?
@@ -25,12 +26,15 @@ with st.expander("What is Regression Analysis?", expanded=False):
     This specific regression model runs a **panel regression with country fixed effects**.
     - Controls for unchanging country characteristics (culture, geography, etc.)
     - Analyzes how changes in one variable relate to changes in another over time
-    """)
+    """
+    )
 
 with st.expander(" How to Read the Results Table", expanded=False):
-    st.markdown("""
+    st.markdown(
+        """
     **Variables**: The factors you selected to analyze
-    - Y is the **dependent** variable, the one you want to analyse and see how other factors influence it.
+    - Y is the **dependent** variable, the one you want to analyse and see how other factors 
+    influence it.
     - X is the **independent** variable, the one possibly influencing the dependent variable.
 
     Including multiple X variables (*control variables*) helps you:
@@ -40,8 +44,8 @@ with st.expander(" How to Read the Results Table", expanded=False):
     - **Avoid biased results**: Without controls, you might incorrectly attribute an effect 
     to a variable when it's actually caused by variable another omitted one.
     
-    With contorol variables looking at the outcomes of one means holding other constant: The change in 
-    life expectancy given health expenditure, holding GDP unchanged.
+    With contorol variables looking at the outcomes of one means holding other constant: 
+    The change in life expectancy given health expenditure, holding GDP unchanged.
     
     **Coefficients**: The estimated effect size
     - *Positive* = when X increases, Y tends to increase
@@ -63,9 +67,11 @@ with st.expander(" How to Read the Results Table", expanded=False):
     - We're 95% confident the true effect falls within this range
     - If the interval includes 0, the effect might not be real
     
-    **Intercept**: The baseline value when all predictors are zero (often not meaningful to interpret)
+    **Intercept**: The baseline value when all predictors are zero (often not meaningful to 
+    interpret)
     
-    **R² (R-squared)**: Measures how well your model explains the variation in the dependent variable
+    **R² (R-squared)**: Measures how well your model explains the variation in the dependent 
+    variable
     - Ranges from 0 to 1
     - *R² = 0.75* means your model explains 75% of the variation in Y
     - *Higher = better fit*, but adding more variables always increases R² (even random ones!)
@@ -78,7 +84,8 @@ with st.expander(" How to Read the Results Table", expanded=False):
     **Note**: In panel regressions with country fixed effects, R² can be very high (0.8-0.9+) 
     because fixed effects explain a lot of variation. Focus more on coefficient significance 
     and adjusted R² in this case.
-    """)
+    """
+    )
 
 # Let user select dependent variable
 default_indicator = indicators.index("life_expectancy")
@@ -86,7 +93,7 @@ var_y = st.selectbox(
     "Select dependent variable:",
     options=indicators,
     format_func=lambda x: indicator_display_names[x],
-    index=default_indicator
+    index=default_indicator,
 )
 
 # Let user select independent variables
@@ -104,17 +111,19 @@ clustered = st.checkbox("Use clustered standard errors by country", value=False)
 if vars_x and st.button("Run regression"):
     result = regression(data, var_y, vars_x, clustered=clustered)
     summary_df = regression_summary_table(result)
-    
+
     st.subheader("Regression Results")
-    
+
     # Show R2 and Adjusted R2
-    st.markdown(f"""
+    st.markdown(
+        f"""
     R² = {result.rsquared:.3f}
     \nAdjusted R² = {result.rsquared_adj:.3f}  
-    """)
-    
-    st.dataframe(
-        summary_df.style.apply(highlight_significant, axis = 1)
+    """
     )
-    
-    st.text("The highlighted rows demonstate the variables with P-value < 0.05 which shows significance.")
+
+    st.dataframe(summary_df.style.apply(highlight_significant, axis=1))
+
+    st.text(
+        "The highlighted rows demonstate the variables with P-value < 0.05 which shows significance."
+    )
