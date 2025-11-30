@@ -50,7 +50,7 @@ def plot_map(data, indicator, year):
     elif indicator in good_indicators:
         color_scale = "RdYlGn"
     else:
-        color_scale = "Veridius"
+        color_scale = "Viridis"
 
     # Create map
     plot_map = px.choropleth(
@@ -89,7 +89,7 @@ def correlation_scatterplot(data, ind_x, ind_y, year):
         hover_name="economy",  # show country names on hover
         trendline="ols",  # ordinary least squares regression line
         trendline_color_override="orange",
-        title=f"{ind_x.replace("_", " ").title()} vs {ind_y.replace("_", " ").title()} ({year})",
+        title=f"{ind_x.replace('_', ' ').title()} vs {ind_y.replace('_', ' ').title()} ({year})",
         labels={
             val_x: ind_x.replace("_", " ").title(),
             val_y: ind_y.replace("_", " ").title(),
@@ -137,7 +137,7 @@ def scatterplot_3d(data, ind_x, ind_y, ind_z, year):
         },
         title=(
             f"{ind_x.replace('_', ' ').title()} vs {ind_y.replace('_', ' ').title()}"
-            f"vs {ind_z.replace('_', ' ').title()} ({year})"
+            f" vs {ind_z.replace('_', ' ').title()} ({year})"
         ),
     )
     return fig

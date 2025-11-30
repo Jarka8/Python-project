@@ -33,11 +33,13 @@ cd Python-project
 ```bash
 python3 -m venv venv
 ```
-```bash
->>> For macOS/Linux
-source venv/bin/activate
 
->>> For windows
+For macOS/Linux
+```bash
+source venv/bin/activate
+```
+For windows
+```bash
 .\venv\Scripts\activate
 ```
 
